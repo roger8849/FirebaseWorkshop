@@ -1,0 +1,5 @@
+<resources>
+  <string name="app_name">FirebaseWorkshop</string>
+  <string name="auth_failed">Authentication failed.</string>
+  <string name="bad_email_format">Email is not valid.</string>
+</resources>

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "521372246886",
+    "firebase_url": "https://fir-workshop-89db6.firebaseio.com",
+    "project_id": "fir-workshop-89db6",
+    "storage_bucket": "fir-workshop-89db6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521372246886:android:673297c48b1ed6d9",
+        "android_client_info": {
+          "package_name": "javeriana.edu.co.firebaseworkshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "521372246886-89m3goh8o050q8oi6hjisadf7cifjpcc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "javeriana.edu.co.firebaseworkshop",
+            "certificate_hash": "d204ee0852355c83a1653ef449afa1efe337417f"
+          }
+        },
+        {
+          "client_id": "521372246886-aroin6ltm72itsk5pgv284678jmogc9u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWH8UcHK4p4CUoFtuQF8L17q_ujgmK6Gk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "521372246886-aroin6ltm72itsk5pgv284678jmogc9u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
