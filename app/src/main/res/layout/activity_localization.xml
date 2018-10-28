@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  tools:context=".LocalizationActivity">
+  <TextView
+    android:id="@+id/activityTitle"
+    android:layout_width="match_parent"
+    android:layout_height="32dp"
+    android:gravity="center"
+    android:text="Location Aware APP"
+    android:textSize="18sp"
+    android:textStyle="normal|bold" />
+
+  <TextView
+    android:id="@+id/latitudeTextView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp" />
+
+  <TextView
+    android:id="@+id/longitudeTextView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp" />
+
+  <TextView
+    android:id="@+id/altitudeTextView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp" />
+
+  <TextView
+    android:id="@+id/airportDistanceView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp" />
+
+  <TextView
+    android:id="@+id/savedLocationsTextView"
+    android:layout_width="match_parent"
+    android:layout_height="32dp"
+    android:gravity="center"
+    android:text="Ubicaciones guardadas"
+    android:textStyle="bold" />
+
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="273dp">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical" >
+
+      <ListView
+        android:id="@+id/locationListView"
+        android:layout_width="match_parent"
+        android:layout_height="269dp"/>
+    </LinearLayout>
+  </ScrollView>
+
+  <Button
+    android:id="@+id/saveLocationButton"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="addLocationsToLocationsList"
+    android:text="Save location" />
+</LinearLayout>
