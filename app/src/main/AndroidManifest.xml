@@ -43,6 +43,8 @@
     </activity>
     <activity android:name=".LocalizationActivity">
     </activity>
+    <activity android:name=".SignupActivity">
+    </activity>
   </application>
 
 </manifest>
