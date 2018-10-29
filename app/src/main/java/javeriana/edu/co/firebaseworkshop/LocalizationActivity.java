@@ -110,7 +110,7 @@ public class LocalizationActivity extends AppCompatActivity {
           longitude.setText("Longitude: " + String.valueOf(location.getLongitude()));
           altitude.setText("Altitude: " + String.valueOf(location.getAltitude()));
 
-          double distance = distance(AIRPORT_LATITUDE, AIRPORT_LONGITUDE, location.getLatitude(),
+          double distance = LocalizationActivity.distance(AIRPORT_LATITUDE, AIRPORT_LONGITUDE, location.getLatitude(),
               location.getLongitude());
 
           distanceToAirport.setText("Distance to airport: " + String.valueOf(distance));
@@ -192,7 +192,7 @@ public class LocalizationActivity extends AppCompatActivity {
     fusedLocationClient.removeLocationUpdates(locationCallback);
   }
 
-  public double distance(double lat1, double long1, double lat2, double long2) {
+  public static double distance(double lat1, double long1, double lat2, double long2) {
     double latDistance = Math.toRadians(lat1 - lat2);
     double lngDistance = Math.toRadians(long1 - long2);
     double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)

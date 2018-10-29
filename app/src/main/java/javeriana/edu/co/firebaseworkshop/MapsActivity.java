@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -35,11 +36,19 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.EncodedPolyline;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import javeriana.edu.co.firebaseworkshop.util.DirectionsJSONParser;
+import org.json.JSONObject;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -120,13 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng position = new LatLng(addressResult.getLatitude(),
                     addressResult.getLongitude());
                 if (mMap != null) {
-//                  MarkerOptions myMarkerOptions = new MarkerOptions();
-//                  myMarkerOptions.position(position);
-//                  myMarkerOptions.title("Address found.");
-//                  myMarkerOptions.icon(
-//                      BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-//                  mMap.addMarker(myMarkerOptions);
-//                  mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 14));
+                  mMap.clear();
                   findRouteBetweenPoints(position);
                 }
 
@@ -182,69 +185,179 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     mMap.addMarker(new MarkerOptions().position(destination).title("Destination"));
 
     //Define list to get all latlng for the route
-    List<LatLng> path = new ArrayList();
+    //List<LatLng> path = new ArrayList();
 
-    //Execute Directions API request
-    GeoApiContext context = new GeoApiContext.Builder()
-        .apiKey("YOUR_API_KEY")
-        .build();
-    String currentLocationString = new StringBuilder(String.valueOf(currentLocation.latitude)).append(",").append(String.valueOf(currentLocation.longitude)).toString();
-    String destinationLocationString = new StringBuilder(String.valueOf(destination.latitude)).append(",").append(String.valueOf(destination.longitude)).toString();
+    LatLng origin = currentLocation;
+    LatLng dest = destination;
 
-    DirectionsApiRequest req = DirectionsApi
-        .getDirections(context, currentLocationString, destinationLocationString);
-    try {
-      DirectionsResult res = req.await();
+    // Getting URL to the Google Directions API
+    String url = getDirectionsUrl(origin, dest);
 
-      //Loop through legs and steps to get encoded polylines of each step
-      if (res.routes != null && res.routes.length > 0) {
-        DirectionsRoute route = res.routes[0];
+    DownloadTask downloadTask = new DownloadTask();
 
-        if (route.legs != null) {
-          for (int i = 0; i < route.legs.length; i++) {
-            DirectionsLeg leg = route.legs[i];
-            if (leg.steps != null) {
-              for (int j = 0; j < leg.steps.length; j++) {
-                DirectionsStep step = leg.steps[j];
-                if (step.steps != null && step.steps.length > 0) {
-                  for (int k = 0; k < step.steps.length; k++) {
-                    DirectionsStep step1 = step.steps[k];
-                    EncodedPolyline points1 = step1.polyline;
-                    if (points1 != null) {
-                      //Decode polyline and add points to list of route coordinates
-                      List<com.google.maps.model.LatLng> coords1 = points1.decodePath();
-                      for (com.google.maps.model.LatLng coord1 : coords1) {
-                        path.add(new LatLng(coord1.lat, coord1.lng));
-                      }
-                    }
-                  }
-                } else {
-                  EncodedPolyline points = step.polyline;
-                  if (points != null) {
-                    //Decode polyline and add points to list of route coordinates
-                    List<com.google.maps.model.LatLng> coords = points.decodePath();
-                    for (com.google.maps.model.LatLng coord : coords) {
-                      path.add(new LatLng(coord.lat, coord.lng));
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } catch (Exception ex) {
-      Log.e("LOCALIZATION TEST", ex.getLocalizedMessage());
-    }
+    // Start downloading json data from Google Directions API
+    downloadTask.execute(url);
 
-    //Draw the polyline
-    if (path.size() > 0) {
-      PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
-      mMap.addPolyline(opts);
-    }
 
     mMap.getUiSettings().setZoomControlsEnabled(true);
 
     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 11));
+
+    double distance = LocalizationActivity
+        .distance(currentLocation.latitude, currentLocation.longitude, destination.latitude,
+            destination.longitude);
+
+    Toast.makeText(MapsActivity.this, "Distance between the points: " + distance + " KM ",
+        Toast.LENGTH_LONG).show();
+
   }
+
+  private class DownloadTask extends AsyncTask<String, Void, String> {
+
+    @Override
+    protected String doInBackground(String... url) {
+
+      String data = "";
+
+      try {
+        data = downloadUrl(url[0]);
+      } catch (Exception e) {
+        Log.d("Background Task", e.toString());
+      }
+      return data;
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+      super.onPostExecute(result);
+      ParserTask parserTask = new ParserTask();
+      parserTask.execute(result);
+
+    }
+  }
+
+
+  /**
+   * A class to parse the Google Places in JSON format
+   */
+  private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+    @Override
+    protected void onPreExecute() {
+      super.onPreExecute();
+    }
+
+    // Parsing the data in non-ui thread
+    @Override
+    protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+      JSONObject jObject;
+      List<List<HashMap<String, String>>> routes = null;
+
+      try {
+        jObject = new JSONObject(jsonData[0]);
+        DirectionsJSONParser parser = new DirectionsJSONParser();
+
+        routes = parser.parse(jObject);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return routes;
+    }
+
+    @Override
+    protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+      ArrayList points = null;
+      PolylineOptions lineOptions = null;
+      MarkerOptions markerOptions = new MarkerOptions();
+
+      for (int i = 0; i < result.size(); i++) {
+        points = new ArrayList();
+        lineOptions = new PolylineOptions();
+
+        List<HashMap<String, String>> path = result.get(i);
+
+        for (int j = 0; j < path.size(); j++) {
+          HashMap<String, String> point = path.get(j);
+
+          double lat = Double.parseDouble(point.get("lat"));
+          double lng = Double.parseDouble(point.get("lng"));
+          LatLng position = new LatLng(lat, lng);
+
+          points.add(position);
+        }
+
+        lineOptions.addAll(points);
+        lineOptions.width(12);
+        lineOptions.color(Color.RED);
+        lineOptions.geodesic(true);
+
+      }
+
+// Drawing polyline in the Google Map for the i-th route
+      mMap.addPolyline(lineOptions);
+    }
+  }
+
+  private String getDirectionsUrl(LatLng origin, LatLng dest) {
+
+    // Origin of route
+    String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+    // Destination of route
+    String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+    // Sensor enabled
+    String sensor = "sensor=false";
+    String mode = "mode=driving";
+    // Building the parameters to the web service
+    String parameters = new StringBuilder(str_origin).append("&").append(str_dest).append("&").append(sensor).append("&").append(mode).toString();
+
+    // Output format
+    String output = "json";
+
+    // Building the url to the web service
+    StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/directions/").append(output).append("?").append(parameters).append("&key=").append("AIzaSyB-RCRlVcWDSlOpe-IBfUiqw0Eco8Z8-5c");
+
+    return url.toString();
+  }
+
+  /**
+   * A method to download json data from url
+   */
+  private String downloadUrl(String strUrl) throws IOException {
+    String data = "";
+    InputStream iStream = null;
+    HttpURLConnection urlConnection = null;
+    try {
+      URL url = new URL(strUrl);
+
+      urlConnection = (HttpURLConnection) url.openConnection();
+
+      urlConnection.connect();
+
+      iStream = urlConnection.getInputStream();
+
+      BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+      StringBuffer sb = new StringBuffer();
+
+      String line = "";
+      while ((line = br.readLine()) != null) {
+        sb.append(line);
+      }
+
+      data = sb.toString();
+
+      br.close();
+
+    } catch (Exception e) {
+      Log.e("Exception", e.toString());
+    } finally {
+      iStream.close();
+      urlConnection.disconnect();
+    }
+    return data;
+  }
+
 }

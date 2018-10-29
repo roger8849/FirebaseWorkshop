@@ -12,28 +12,33 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.location.LocationRequest;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class HomeUserActivity extends AppCompatActivity {
 
   private FirebaseAuth mAuth;
-
-
   private LocationRequest locationRequest;
   private final static int LOCATION_PERMISSION = 0;
 
   protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+
+  private TextView userName;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_home_user);
     mAuth = FirebaseAuth.getInstance();
+    userName = findViewById(R.id.userText);
     locationRequest = createLocationRequest();
     requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, "Location access needed.",
         LOCATION_PERMISSION);
+    FirebaseUser user = mAuth.getCurrentUser();
+    userName.setText(user.getEmail());
   }
 
   @Override
