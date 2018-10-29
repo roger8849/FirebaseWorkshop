@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
   private FirebaseAuth.AuthStateListener mAuthListener;
   private EditText mUser;
   private EditText mPassword;
+  private Button mLoginButton;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,34 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     mUser = findViewById(R.id.userEmailText);
     mPassword = findViewById(R.id.userPassword);
+    mLoginButton = findViewById(R.id.loginButton);
+
+    mLoginButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        if (validateForm()) {
+          String email = mUser.getText().toString();
+          String password = mPassword.getText().toString();
+          mAuth.signInWithEmailAndPassword(email, password)
+              .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                  Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                  if (!task.isSuccessful()) {
+                    Log.w(TAG, "signInWithEmail:failed", task.getException());
+                    Toast.makeText(MainActivity.this, R.string.auth_failed,
+                        Toast.LENGTH_SHORT).show();
+                    mUser.setText("");
+                    mPassword.setText("");
+                  } else {
+                    Intent intent = new Intent(MainActivity.this, HomeUserActivity.class);
+                    startActivity(intent);
+                  }
+                }
+              });
+        }
+      }
+    });
 
     mAuth = FirebaseAuth.getInstance();
     mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -36,41 +66,19 @@ public class MainActivity extends AppCompatActivity {
       public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user != null) {
-        // User is signed in
+          // User is signed in
           Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
           startActivity(new Intent(MainActivity.this, HomeUserActivity.class));
         } else {
-        // User is signed out
+          // User is signed out
           Log.d(TAG, "onAuthStateChanged:signed_out");
         }
       }
     };
   }
 
+  public void fancyMethod(View view) {
 
-
-  public void signInUser(View view) {
-    if (validateForm()) {
-      String email = mUser.getText().toString();
-      String password = mPassword.getText().toString();
-      mAuth.signInWithEmailAndPassword(email, password)
-          .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-              Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-              if (!task.isSuccessful()) {
-                Log.w(TAG, "signInWithEmail:failed", task.getException());
-                Toast.makeText(MainActivity.this, R.string.auth_failed,
-                    Toast.LENGTH_SHORT).show();
-                mUser.setText("");
-                mPassword.setText("");
-              } else {
-                Intent intent = new Intent(MainActivity.this, HomeUserActivity.class);
-                startActivity(intent);
-              }
-            }
-          });
-    }
   }
 
   private boolean validateForm() {
@@ -80,10 +88,10 @@ public class MainActivity extends AppCompatActivity {
     if (TextUtils.isEmpty(email) && !isEmailValid(email)) {
       mUser.setError("Required.");
       valid = false;
-    } else if(!isEmailValid(email)){
+    } else if (!isEmailValid(email)) {
       mUser.setError("Email is not valid.");
       valid = false;
-    }else {
+    } else {
       mUser.setError(null);
     }
     String password = mPassword.getText().toString();

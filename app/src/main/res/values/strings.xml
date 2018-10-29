@@ -3,4 +3,7 @@
   <string name="auth_failed">Authentication failed.</string>
   <string name="bad_email_format">Email is not valid.</string>
   <string name="title_activity_maps">Maps</string>
+  <string name="menulogout">Log out</string>
+  <string name="menuConfiguracion">Settings</string>
+  <string name="Address">Search Address</string>
 </resources>
