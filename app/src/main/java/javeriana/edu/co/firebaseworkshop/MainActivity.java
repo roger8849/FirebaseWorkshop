@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
   private FirebaseAuth.AuthStateListener mAuthListener;
   private EditText mUser;
   private EditText mPassword;
-  private Button mLoginButton;
+  private Button mLoginButton, mSignupButton;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     mUser = findViewById(R.id.userEmailText);
     mPassword = findViewById(R.id.userPassword);
     mLoginButton = findViewById(R.id.loginButton);
+    mSignupButton = findViewById(R.id.signUp);
 
     mLoginButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -60,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
+    mSignupButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        Intent intent = new Intent( MainActivity.this, SignupActivity.class);
+        startActivity(intent);
+      }
+    });
+
     mAuth = FirebaseAuth.getInstance();
     mAuthListener = new FirebaseAuth.AuthStateListener() {
       @Override
@@ -77,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
     };
   }
 
-  public void fancyMethod(View view) {
-
-  }
 
   private boolean validateForm() {
 

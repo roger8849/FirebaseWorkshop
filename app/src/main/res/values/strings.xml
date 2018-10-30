@@ -6,4 +6,5 @@
   <string name="menulogout">Log out</string>
   <string name="menuConfiguracion">Settings</string>
   <string name="Address">Search Address</string>
+  <string name="email">Email</string>
 </resources>

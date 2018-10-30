@@ -289,7 +289,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         lineOptions.addAll(points);
         lineOptions.width(12);
-        lineOptions.color(Color.RED);
+        lineOptions.color(Color.BLUE);
         lineOptions.geodesic(true);
 
       }
@@ -316,8 +316,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // Output format
     String output = "json";
 
+    String googleKey = getResources().getString(R.string.google_api_key);
+
     // Building the url to the web service
-    StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/directions/").append(output).append("?").append(parameters).append("&key=").append("AIzaSyB-RCRlVcWDSlOpe-IBfUiqw0Eco8Z8-5c");
+    StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/directions/").append(output).append("?").append(parameters).append("&key=").append(googleKey);
 
     return url.toString();
   }
