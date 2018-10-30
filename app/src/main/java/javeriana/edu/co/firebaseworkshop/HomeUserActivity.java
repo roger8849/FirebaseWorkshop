@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,7 +39,12 @@ public class HomeUserActivity extends AppCompatActivity {
     requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, "Location access needed.",
         LOCATION_PERMISSION);
     FirebaseUser user = mAuth.getCurrentUser();
-    userName.setText(user.getEmail());
+    String displayName = user.getDisplayName();
+    if(TextUtils.isEmpty(displayName)){
+      userName.setText(user.getEmail());
+    } else {
+      userName.setText(displayName);
+    }
   }
 
   @Override
